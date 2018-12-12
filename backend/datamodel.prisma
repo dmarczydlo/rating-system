@@ -1,0 +1,16 @@
+type Player {
+  id: ID! @unique
+  name: String!
+  surname: String!
+  club: String!
+  score1: Float
+  score2: Float
+  score3: Float
+  list: List!
+}
+
+type List {
+  id: ID! @unique
+  name: String!
+  arbiters: Int!
+}

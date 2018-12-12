@@ -1,0 +1,19 @@
+# import * from './generated/prisma.graphql'
+
+type Mutation {
+    createList(name: String!, arbiters: Int!): List!
+    updateList(id: ID!, name: String, arbiters: Int): List!
+    deleteList(id: ID!): List
+
+    createPlayer(name: String!, surname: String!, club: String!, score1: Float, score2: Float, score3: Float, listId: ID!): Player!
+    updatePlayer(id: ID!, name: String, surname: String, club: String, score1: Float!, score2: Float, score3: Float, listId: ID): Player!
+    deletePlayer(id: ID!): Player
+
+}
+
+type Query {
+    lists(where: ListWhereInput, orderBy: ListOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [List]
+    list(where: ListWhereUniqueInput!): List
+    player(where: PlayerWhereUniqueInput!): Player
+    players(where: PlayerWhereInput, orderBy: PlayerOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Player]
+}

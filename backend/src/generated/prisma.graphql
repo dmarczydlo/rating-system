@@ -1,0 +1,691 @@
+# source: https://eu1.prisma.sh/daniel-marczydlo-7cab83/rating-system/dev
+# timestamp: Wed Dec 12 2018 17:28:32 GMT+0100 (CET)
+
+type AggregateList {
+  count: Int!
+}
+
+type AggregatePlayer {
+  count: Int!
+}
+
+type BatchPayload {
+  """The number of nodes that have been affected by the Batch operation."""
+  count: Long!
+}
+
+type List implements Node {
+  id: ID!
+  name: String!
+  arbiters: Int!
+}
+
+"""A connection to a list of items."""
+type ListConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [ListEdge]!
+  aggregate: AggregateList!
+}
+
+input ListCreateInput {
+  name: String!
+  arbiters: Int!
+}
+
+input ListCreateOneInput {
+  create: ListCreateInput
+  connect: ListWhereUniqueInput
+}
+
+"""An edge in a connection."""
+type ListEdge {
+  """The item at the end of the edge."""
+  node: List!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum ListOrderByInput {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  arbiters_ASC
+  arbiters_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+type ListPreviousValues {
+  id: ID!
+  name: String!
+  arbiters: Int!
+}
+
+type ListSubscriptionPayload {
+  mutation: MutationType!
+  node: List
+  updatedFields: [String!]
+  previousValues: ListPreviousValues
+}
+
+input ListSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [ListSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [ListSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [ListSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: ListWhereInput
+}
+
+input ListUpdateDataInput {
+  name: String
+  arbiters: Int
+}
+
+input ListUpdateInput {
+  name: String
+  arbiters: Int
+}
+
+input ListUpdateManyMutationInput {
+  name: String
+  arbiters: Int
+}
+
+input ListUpdateOneRequiredInput {
+  create: ListCreateInput
+  connect: ListWhereUniqueInput
+  update: ListUpdateDataInput
+  upsert: ListUpsertNestedInput
+}
+
+input ListUpsertNestedInput {
+  update: ListUpdateDataInput!
+  create: ListCreateInput!
+}
+
+input ListWhereInput {
+  """Logical AND on all given filters."""
+  AND: [ListWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [ListWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [ListWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  name: String
+
+  """All values that are not equal to given value."""
+  name_not: String
+
+  """All values that are contained in given list."""
+  name_in: [String!]
+
+  """All values that are not contained in given list."""
+  name_not_in: [String!]
+
+  """All values less than the given value."""
+  name_lt: String
+
+  """All values less than or equal the given value."""
+  name_lte: String
+
+  """All values greater than the given value."""
+  name_gt: String
+
+  """All values greater than or equal the given value."""
+  name_gte: String
+
+  """All values containing the given string."""
+  name_contains: String
+
+  """All values not containing the given string."""
+  name_not_contains: String
+
+  """All values starting with the given string."""
+  name_starts_with: String
+
+  """All values not starting with the given string."""
+  name_not_starts_with: String
+
+  """All values ending with the given string."""
+  name_ends_with: String
+
+  """All values not ending with the given string."""
+  name_not_ends_with: String
+  arbiters: Int
+
+  """All values that are not equal to given value."""
+  arbiters_not: Int
+
+  """All values that are contained in given list."""
+  arbiters_in: [Int!]
+
+  """All values that are not contained in given list."""
+  arbiters_not_in: [Int!]
+
+  """All values less than the given value."""
+  arbiters_lt: Int
+
+  """All values less than or equal the given value."""
+  arbiters_lte: Int
+
+  """All values greater than the given value."""
+  arbiters_gt: Int
+
+  """All values greater than or equal the given value."""
+  arbiters_gte: Int
+}
+
+input ListWhereUniqueInput {
+  id: ID
+}
+
+"""
+The `Long` scalar type represents non-fractional signed whole numeric values.
+Long can represent values between -(2^63) and 2^63 - 1.
+"""
+scalar Long
+
+type Mutation {
+  createPlayer(data: PlayerCreateInput!): Player!
+  createList(data: ListCreateInput!): List!
+  updatePlayer(data: PlayerUpdateInput!, where: PlayerWhereUniqueInput!): Player
+  updateList(data: ListUpdateInput!, where: ListWhereUniqueInput!): List
+  deletePlayer(where: PlayerWhereUniqueInput!): Player
+  deleteList(where: ListWhereUniqueInput!): List
+  upsertPlayer(where: PlayerWhereUniqueInput!, create: PlayerCreateInput!, update: PlayerUpdateInput!): Player!
+  upsertList(where: ListWhereUniqueInput!, create: ListCreateInput!, update: ListUpdateInput!): List!
+  updateManyPlayers(data: PlayerUpdateManyMutationInput!, where: PlayerWhereInput): BatchPayload!
+  updateManyLists(data: ListUpdateManyMutationInput!, where: ListWhereInput): BatchPayload!
+  deleteManyPlayers(where: PlayerWhereInput): BatchPayload!
+  deleteManyLists(where: ListWhereInput): BatchPayload!
+}
+
+enum MutationType {
+  CREATED
+  UPDATED
+  DELETED
+}
+
+"""An object with an ID"""
+interface Node {
+  """The id of the object."""
+  id: ID!
+}
+
+"""Information about pagination in a connection."""
+type PageInfo {
+  """When paginating forwards, are there more items?"""
+  hasNextPage: Boolean!
+
+  """When paginating backwards, are there more items?"""
+  hasPreviousPage: Boolean!
+
+  """When paginating backwards, the cursor to continue."""
+  startCursor: String
+
+  """When paginating forwards, the cursor to continue."""
+  endCursor: String
+}
+
+type Player implements Node {
+  id: ID!
+  name: String!
+  surname: String!
+  club: String!
+  score1: Float
+  score2: Float
+  score3: Float
+  list: List!
+}
+
+"""A connection to a list of items."""
+type PlayerConnection {
+  """Information to aid in pagination."""
+  pageInfo: PageInfo!
+
+  """A list of edges."""
+  edges: [PlayerEdge]!
+  aggregate: AggregatePlayer!
+}
+
+input PlayerCreateInput {
+  name: String!
+  surname: String!
+  club: String!
+  score1: Float
+  score2: Float
+  score3: Float
+  list: ListCreateOneInput!
+}
+
+"""An edge in a connection."""
+type PlayerEdge {
+  """The item at the end of the edge."""
+  node: Player!
+
+  """A cursor for use in pagination."""
+  cursor: String!
+}
+
+enum PlayerOrderByInput {
+  id_ASC
+  id_DESC
+  name_ASC
+  name_DESC
+  surname_ASC
+  surname_DESC
+  club_ASC
+  club_DESC
+  score1_ASC
+  score1_DESC
+  score2_ASC
+  score2_DESC
+  score3_ASC
+  score3_DESC
+  updatedAt_ASC
+  updatedAt_DESC
+  createdAt_ASC
+  createdAt_DESC
+}
+
+type PlayerPreviousValues {
+  id: ID!
+  name: String!
+  surname: String!
+  club: String!
+  score1: Float
+  score2: Float
+  score3: Float
+}
+
+type PlayerSubscriptionPayload {
+  mutation: MutationType!
+  node: Player
+  updatedFields: [String!]
+  previousValues: PlayerPreviousValues
+}
+
+input PlayerSubscriptionWhereInput {
+  """Logical AND on all given filters."""
+  AND: [PlayerSubscriptionWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [PlayerSubscriptionWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [PlayerSubscriptionWhereInput!]
+
+  """
+  The subscription event gets dispatched when it's listed in mutation_in
+  """
+  mutation_in: [MutationType!]
+
+  """
+  The subscription event gets only dispatched when one of the updated fields names is included in this list
+  """
+  updatedFields_contains: String
+
+  """
+  The subscription event gets only dispatched when all of the field names included in this list have been updated
+  """
+  updatedFields_contains_every: [String!]
+
+  """
+  The subscription event gets only dispatched when some of the field names included in this list have been updated
+  """
+  updatedFields_contains_some: [String!]
+  node: PlayerWhereInput
+}
+
+input PlayerUpdateInput {
+  name: String
+  surname: String
+  club: String
+  score1: Float
+  score2: Float
+  score3: Float
+  list: ListUpdateOneRequiredInput
+}
+
+input PlayerUpdateManyMutationInput {
+  name: String
+  surname: String
+  club: String
+  score1: Float
+  score2: Float
+  score3: Float
+}
+
+input PlayerWhereInput {
+  """Logical AND on all given filters."""
+  AND: [PlayerWhereInput!]
+
+  """Logical OR on all given filters."""
+  OR: [PlayerWhereInput!]
+
+  """Logical NOT on all given filters combined by AND."""
+  NOT: [PlayerWhereInput!]
+  id: ID
+
+  """All values that are not equal to given value."""
+  id_not: ID
+
+  """All values that are contained in given list."""
+  id_in: [ID!]
+
+  """All values that are not contained in given list."""
+  id_not_in: [ID!]
+
+  """All values less than the given value."""
+  id_lt: ID
+
+  """All values less than or equal the given value."""
+  id_lte: ID
+
+  """All values greater than the given value."""
+  id_gt: ID
+
+  """All values greater than or equal the given value."""
+  id_gte: ID
+
+  """All values containing the given string."""
+  id_contains: ID
+
+  """All values not containing the given string."""
+  id_not_contains: ID
+
+  """All values starting with the given string."""
+  id_starts_with: ID
+
+  """All values not starting with the given string."""
+  id_not_starts_with: ID
+
+  """All values ending with the given string."""
+  id_ends_with: ID
+
+  """All values not ending with the given string."""
+  id_not_ends_with: ID
+  name: String
+
+  """All values that are not equal to given value."""
+  name_not: String
+
+  """All values that are contained in given list."""
+  name_in: [String!]
+
+  """All values that are not contained in given list."""
+  name_not_in: [String!]
+
+  """All values less than the given value."""
+  name_lt: String
+
+  """All values less than or equal the given value."""
+  name_lte: String
+
+  """All values greater than the given value."""
+  name_gt: String
+
+  """All values greater than or equal the given value."""
+  name_gte: String
+
+  """All values containing the given string."""
+  name_contains: String
+
+  """All values not containing the given string."""
+  name_not_contains: String
+
+  """All values starting with the given string."""
+  name_starts_with: String
+
+  """All values not starting with the given string."""
+  name_not_starts_with: String
+
+  """All values ending with the given string."""
+  name_ends_with: String
+
+  """All values not ending with the given string."""
+  name_not_ends_with: String
+  surname: String
+
+  """All values that are not equal to given value."""
+  surname_not: String
+
+  """All values that are contained in given list."""
+  surname_in: [String!]
+
+  """All values that are not contained in given list."""
+  surname_not_in: [String!]
+
+  """All values less than the given value."""
+  surname_lt: String
+
+  """All values less than or equal the given value."""
+  surname_lte: String
+
+  """All values greater than the given value."""
+  surname_gt: String
+
+  """All values greater than or equal the given value."""
+  surname_gte: String
+
+  """All values containing the given string."""
+  surname_contains: String
+
+  """All values not containing the given string."""
+  surname_not_contains: String
+
+  """All values starting with the given string."""
+  surname_starts_with: String
+
+  """All values not starting with the given string."""
+  surname_not_starts_with: String
+
+  """All values ending with the given string."""
+  surname_ends_with: String
+
+  """All values not ending with the given string."""
+  surname_not_ends_with: String
+  club: String
+
+  """All values that are not equal to given value."""
+  club_not: String
+
+  """All values that are contained in given list."""
+  club_in: [String!]
+
+  """All values that are not contained in given list."""
+  club_not_in: [String!]
+
+  """All values less than the given value."""
+  club_lt: String
+
+  """All values less than or equal the given value."""
+  club_lte: String
+
+  """All values greater than the given value."""
+  club_gt: String
+
+  """All values greater than or equal the given value."""
+  club_gte: String
+
+  """All values containing the given string."""
+  club_contains: String
+
+  """All values not containing the given string."""
+  club_not_contains: String
+
+  """All values starting with the given string."""
+  club_starts_with: String
+
+  """All values not starting with the given string."""
+  club_not_starts_with: String
+
+  """All values ending with the given string."""
+  club_ends_with: String
+
+  """All values not ending with the given string."""
+  club_not_ends_with: String
+  score1: Float
+
+  """All values that are not equal to given value."""
+  score1_not: Float
+
+  """All values that are contained in given list."""
+  score1_in: [Float!]
+
+  """All values that are not contained in given list."""
+  score1_not_in: [Float!]
+
+  """All values less than the given value."""
+  score1_lt: Float
+
+  """All values less than or equal the given value."""
+  score1_lte: Float
+
+  """All values greater than the given value."""
+  score1_gt: Float
+
+  """All values greater than or equal the given value."""
+  score1_gte: Float
+  score2: Float
+
+  """All values that are not equal to given value."""
+  score2_not: Float
+
+  """All values that are contained in given list."""
+  score2_in: [Float!]
+
+  """All values that are not contained in given list."""
+  score2_not_in: [Float!]
+
+  """All values less than the given value."""
+  score2_lt: Float
+
+  """All values less than or equal the given value."""
+  score2_lte: Float
+
+  """All values greater than the given value."""
+  score2_gt: Float
+
+  """All values greater than or equal the given value."""
+  score2_gte: Float
+  score3: Float
+
+  """All values that are not equal to given value."""
+  score3_not: Float
+
+  """All values that are contained in given list."""
+  score3_in: [Float!]
+
+  """All values that are not contained in given list."""
+  score3_not_in: [Float!]
+
+  """All values less than the given value."""
+  score3_lt: Float
+
+  """All values less than or equal the given value."""
+  score3_lte: Float
+
+  """All values greater than the given value."""
+  score3_gt: Float
+
+  """All values greater than or equal the given value."""
+  score3_gte: Float
+  list: ListWhereInput
+}
+
+input PlayerWhereUniqueInput {
+  id: ID
+}
+
+type Query {
+  players(where: PlayerWhereInput, orderBy: PlayerOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [Player]!
+  lists(where: ListWhereInput, orderBy: ListOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [List]!
+  player(where: PlayerWhereUniqueInput!): Player
+  list(where: ListWhereUniqueInput!): List
+  playersConnection(where: PlayerWhereInput, orderBy: PlayerOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): PlayerConnection!
+  listsConnection(where: ListWhereInput, orderBy: ListOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): ListConnection!
+
+  """Fetches an object given its ID"""
+  node(
+    """The ID of an object"""
+    id: ID!
+  ): Node
+}
+
+type Subscription {
+  player(where: PlayerSubscriptionWhereInput): PlayerSubscriptionPayload
+  list(where: ListSubscriptionWhereInput): ListSubscriptionPayload
+}

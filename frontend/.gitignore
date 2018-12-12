@@ -1,0 +1,8 @@
+dist
+node_modules
+.npm
+.eslintcache
+.idea/
+/coverage/
+yarn-error.log
+cypress/videos
