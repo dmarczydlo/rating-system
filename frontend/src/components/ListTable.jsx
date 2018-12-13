@@ -1,12 +1,12 @@
 import React, { Component, Fragment } from 'react';
-import { Query, withApollo } from 'react-apollo';
+import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import ReactTable from "react-table";
 import { Link } from 'react-router-dom';
 import "react-table/react-table.css";
 
-const ALL_LISTS_QUERY = gql`
-  query ALL_LISTS_QUERY {
+const QUERY_ALL_LISTS_QUERY = gql`
+  query QUERY_ALL_LISTS_QUERY {
     lists(orderBy: createdAt_ASC) {
         id
         name
@@ -15,21 +15,30 @@ const ALL_LISTS_QUERY = gql`
   }
  `;
 
-const GET_SELECTED_LIST = gql`
-query GET_SELECTED_LIST ($id: ID!) {
-  list(where: {id: $id}) {
+const MUTATION_UPDATE_LIST = gql`
+  mutation MUTATION_UPDATE_LIST(
+      $id: ID!
+      $name: String!
+      $arbiters: Int!
+  ) {
+    updateList(
+        id: $id
+        name: $name
+        arbiters: $arbiters
+    )
+    {
         id
         name
         arbiters
+    }
   }
-}
 `;
 
 // eslint-disable-next-line react/no-multi-comp
 class ListTable extends Component {
     state = {
         dataLayer: {},
-        showDataLayer: false,
+        showDataLayer: false
     };
 
     columns = [
@@ -46,7 +55,7 @@ class ListTable extends Component {
             Cell: row => (
                 <Fragment>
                     <button
-                        onClick={() => this.handleOnClickList('edit', row.value)}
+                        onClick={() => this.handleOnClickList('edit', row)}
                         type="button"
                     >
                         {'Edit'}
@@ -56,7 +65,7 @@ class ListTable extends Component {
                         {'Enter'}
                     </Link>
                     <button
-                        onClick={() => this.handleOnClickList('remove', row.value)}
+                        onClick={() => this.handleOnClickList('remove', row)}
                         type="button"
                     >
                         {'Remove'}
@@ -68,35 +77,61 @@ class ListTable extends Component {
         }
     ];
 
-    handleOnClickList = async (type, value) => {
-        const { client } = this.props;
+    handleOnClickList = (type, data) => {
+        const { id, name, arbiters } = data.row;
+        if (type === 'edit') {
 
-        const { data } = await client.query({
-            query: GET_SELECTED_LIST,
-            variables: { id: value }
-        });
-
-        if (data.list) {
-            this.setState({ showDataLayer: true, dataLayer: data.list });
+            const dataLayer = {
+                arbiters,
+                id,
+                name
+            };
+            this.setState({
+                dataLayer,
+                showDataLayer: true
+            });
         }
     }
 
     handleOnUpdateField = e => {
-        console.log(e.target.value);
-        this.setState({
-            [e.target.name]: e.target.value
-        });
+        let { dataLayer } = this.state;
+        let { value } = e.target;
+        const { name } = e.target;
+        if (value) {
+            if (name === "arbiters") {
+                value = parseInt(value, 10);
+            }
+            dataLayer = {
+                ...dataLayer,
+                [name]: value
+            };
+            this.setState({ dataLayer });
+        }
+    }
+
+    updateList = async (e, updateListMutatiomn) => {
+        e.preventDefault();
+        const { dataLayer } = this.state;
+        const res = await updateListMutatiomn({ variables: dataLayer });
+
+        if (res) {
+            this.setState({ showDataLayer: false });
+        }
     }
 
     render() {
         const { showDataLayer, dataLayer } = this.state;
         return (
             <div>
-                <Query query={ALL_LISTS_QUERY}>
+                <Query query={QUERY_ALL_LISTS_QUERY}>
                     {({ data, error, loading }) => {
 
-                        if (loading) return <p>Loading...</p>;
-                        if (error) return <p>Error: {error.message}</p>;
+                        if (loading) {
+                            return <p>{'Loading...'}</p>;
+                        }
+                        if (error) {
+                            return (<p>{`Error: ${error.message}`}</p>);
+                        }
                         return (
                             <div>
                                 <ReactTable
@@ -107,18 +142,30 @@ class ListTable extends Component {
                                 />
 
                                 {showDataLayer && (
-                                    <div>
-                                        <input
-                                            defaultValue={dataLayer.name}
-                                            name="name"
-                                            onChange={this.handleOnUpdateField}
-                                        />
-                                        <input
-                                            defaultValue={dataLayer.arbiters}
-                                            name="arbiters"
-                                            onChange={this.handleOnUpdateField}
-                                        />
-                                    </div>
+                                    <Mutation mutation={MUTATION_UPDATE_LIST} >
+                                        {(updateList, { loading, error }) => (
+                                            <div>
+                                                <input
+                                                    name="name"
+                                                    onChange={this.handleOnUpdateField}
+                                                    value={dataLayer.name}
+                                                />
+                                                <input
+                                                    name="arbiters"
+                                                    onChange={this.handleOnUpdateField}
+                                                    value={dataLayer.arbiters}
+                                                />
+                                                <button
+                                                    onClick={e => this.updateList(e, updateList)}
+                                                    type="button"
+                                                >
+                                                    {'Update'}
+                                                </button>
+                                                {error && <div>{JSON.stringify(error)}</div>}
+                                                {loading && <p>{'Loading'}</p>}
+                                            </div>
+                                        )}
+                                    </Mutation>
                                 )}
                             </div>
                         );
@@ -130,4 +177,4 @@ class ListTable extends Component {
     }
 }
 
-export default withApollo(ListTable);
+export default ListTable;
