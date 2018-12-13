@@ -12,22 +12,7 @@ const header = () => {
                             name="home"
                             to="/"
                         >
-                            {'Counter'}
-                        </Link>
-                    </div>
-                    <div>
-                        <Link
-                            name="form"
-                            to="/form"
-                        >
-                            {'Form'}
-                        </Link>
-                    </div>
-                    <div>
-                        <Link
-                            to="/abcd"
-                        >
-                            {'Error'}
+                            {'Home'}
                         </Link>
                     </div>
                 </div>

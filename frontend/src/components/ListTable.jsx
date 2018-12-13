@@ -3,7 +3,6 @@ import { Query, Mutation } from 'react-apollo';
 import gql from 'graphql-tag';
 import ReactTable from "react-table";
 import { Link } from 'react-router-dom';
-import "react-table/react-table.css";
 
 const QUERY_ALL_LISTS_QUERY = gql`
   query QUERY_ALL_LISTS_QUERY {
@@ -34,6 +33,23 @@ const MUTATION_UPDATE_LIST = gql`
   }
 `;
 
+const MUTATION_CREATE_LIST = gql`
+  mutation MUTATION_CREATE_LIST (
+      $name: String!
+      $arbiters: Int!
+  ) {
+      createList (
+          name: $name
+          arbiters: $arbiters
+      )
+      {
+        id
+        name
+        arbiters
+      }
+  }
+`;
+
 // eslint-disable-next-line react/no-multi-comp
 class ListTable extends Component {
     state = {
@@ -61,7 +77,7 @@ class ListTable extends Component {
                         {'Edit'}
                     </button>
 
-                    <Link to={`/list/${row.value}`}>
+                    <Link to={`/players/${row.value}/${row.row.arbiters}`}>
                         {'Enter'}
                     </Link>
                     <button
@@ -97,19 +113,28 @@ class ListTable extends Component {
         let { dataLayer } = this.state;
         let { value } = e.target;
         const { name } = e.target;
-        if (value) {
-            if (name === "arbiters") {
-                value = parseInt(value, 10);
-            }
-            dataLayer = {
-                ...dataLayer,
-                [name]: value
-            };
-            this.setState({ dataLayer });
+        if (name === "arbiters") {
+            value = parseInt(value, 10);
         }
+        dataLayer = {
+            ...dataLayer,
+            [name]: value
+        };
+        this.setState({ dataLayer });
     }
 
-    updateList = async (e, updateListMutatiomn) => {
+    handleOnClickNewList = () => {
+        const dataLayer = {
+            arbiters: '',
+            name: ''
+        };
+        this.setState({
+            dataLayer,
+            showDataLayer: true
+        });
+    }
+
+    createOrUpdateList = async (e, updateListMutatiomn) => {
         e.preventDefault();
         const { dataLayer } = this.state;
         const res = await updateListMutatiomn({ variables: dataLayer });
@@ -121,6 +146,7 @@ class ListTable extends Component {
 
     render() {
         const { showDataLayer, dataLayer } = this.state;
+        const { id = '' } = dataLayer;
         return (
             <div>
                 <Query query={QUERY_ALL_LISTS_QUERY}>
@@ -134,39 +160,59 @@ class ListTable extends Component {
                         }
                         return (
                             <div>
-                                <ReactTable
-                                    columns={this.columns}
-                                    data={data.lists}
-                                    minRows={0}
-                                    showPagination={false}
-                                />
-
+                                <button
+                                    onClick={this.handleOnClickNewList}
+                                    type="button"
+                                >
+                                    {'Add list'}
+                                </button>
                                 {showDataLayer && (
-                                    <Mutation mutation={MUTATION_UPDATE_LIST} >
-                                        {(updateList, { loading, error }) => (
+                                    <Mutation
+                                        mutation={id ? MUTATION_UPDATE_LIST : MUTATION_CREATE_LIST}
+                                        update={(cache, { data: { createList } }) => {
+                                            if (!id) {
+                                                const { lists } = cache.readQuery({ query: QUERY_ALL_LISTS_QUERY });
+                                                cache.writeQuery({
+                                                    data: { lists: lists.concat([createList]) },
+                                                    query: QUERY_ALL_LISTS_QUERY
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        {(mutation, { loading, error }) => (
                                             <div>
+                                                <label htmlFor="name">{'Name'}</label>
                                                 <input
                                                     name="name"
                                                     onChange={this.handleOnUpdateField}
                                                     value={dataLayer.name}
                                                 />
+                                                <label htmlFor="arbiters">{'Arbiters'}</label>
                                                 <input
                                                     name="arbiters"
                                                     onChange={this.handleOnUpdateField}
                                                     value={dataLayer.arbiters}
                                                 />
                                                 <button
-                                                    onClick={e => this.updateList(e, updateList)}
+                                                    onClick={e => this.createOrUpdateList(e, mutation)}
                                                     type="button"
                                                 >
-                                                    {'Update'}
+                                                    {'Save'}
                                                 </button>
                                                 {error && <div>{JSON.stringify(error)}</div>}
                                                 {loading && <p>{'Loading'}</p>}
                                             </div>
                                         )}
                                     </Mutation>
-                                )}
+                                )
+                                }
+                                <ReactTable
+                                    columns={this.columns}
+                                    data={data.lists}
+                                    minRows={0}
+                                    showPagination={false}
+                                    defaultPageSize={100}
+                                />
                             </div>
                         );
                     }}

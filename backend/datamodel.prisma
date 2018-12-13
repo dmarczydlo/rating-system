@@ -6,7 +6,7 @@ type Player {
   score1: Float
   score2: Float
   score3: Float
-  list: List!
+  list: List! @relation(name: "PlayerList", onDelete: CASCADE)
 }
 
 type List {

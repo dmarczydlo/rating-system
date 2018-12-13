@@ -3,6 +3,7 @@ const _ = require('lodash');
 module.exports = {
 
     async createPlayer(parent, args, ctx, info) {
+        console.log('create');
      
         const { name, surname, club, score1, scrore2, score3, listId } = args;
       

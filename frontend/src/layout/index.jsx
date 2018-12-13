@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import Header from './header';
 import Footer from './footer';
 import '../style/index.scss';
+import "react-table/react-table.css";
+
 
 const Index = ({ children }) => {
     return (

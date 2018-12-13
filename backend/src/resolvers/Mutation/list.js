@@ -3,6 +3,11 @@ module.exports = {
 
     async createList(parent, args, ctx, info) {
         const { name, arbiters } = args;
+
+        if ((arbiters > 3 || arbiters < 1) && arbiters) {
+            throw new Error('ARBITERS_INCORRECT_VALUE');
+        }
+
         if (!name || !arbiters) {
             throw new Error('LIST_BAD_REQUEST');
         }
@@ -17,6 +22,8 @@ module.exports = {
     },
 
     updateList(parent, args, ctx, info) {
+
+        console.log('update');
         const { arbiters } = args;
         if ((arbiters > 3 || arbiters < 1) && arbiters) {
             throw new Error('ARBITERS_INCORRECT_VALUE');

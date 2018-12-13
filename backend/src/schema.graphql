@@ -6,7 +6,7 @@ type Mutation {
     deleteList(id: ID!): List
 
     createPlayer(name: String!, surname: String!, club: String!, score1: Float, score2: Float, score3: Float, listId: ID!): Player!
-    updatePlayer(id: ID!, name: String, surname: String, club: String, score1: Float!, score2: Float, score3: Float, listId: ID): Player!
+    updatePlayer(id: ID!, name: String, surname: String, club: String, score1: Float, score2: Float, score3: Float, listId: ID): Player!
     deletePlayer(id: ID!): Player
 
 }
