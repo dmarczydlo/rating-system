@@ -250,6 +250,7 @@ class List extends Component {
 
 
     render() {
+        // eslint-disable-next-line react/prop-types
         const { match: { params: { listId, arbiters } } } = this.props;
         const { showPlayerLayer, playerLayer } = this.state;
         const {

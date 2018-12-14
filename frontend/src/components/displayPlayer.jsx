@@ -1,14 +1,10 @@
 import React from 'react';
-import { ListGroupItem } from 'reactstrap';
+import { ListGroupItem, Badge } from 'reactstrap';
 
 const DisplayPlayer = ({ player }) => {
     return (
         <ListGroupItem>
-            <span>{player.position}) </span>
-            <span>{player.name} | </span>
-            <span>{player.surname} | </span>
-            <span>{player.club} | </span>
-            <span>{player.total}</span>
+<Badge pill>{player.position}</Badge> {`${player.name} ${player.surname} (${player.club})`} {'-'} {player.total}
         </ListGroupItem>
     );
 };
