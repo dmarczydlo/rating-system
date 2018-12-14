@@ -1,13 +1,35 @@
+// eslint-disable-next-line max-lines
 import React, { Component, Fragment } from 'react';
-import { Query, Mutation } from 'react-apollo';
+import { Query, Mutation, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { withRouter } from 'react-router';
 import Ranks from './ranks';
-import DisplayPlayer from './displayPlayer';
 
 import ReactTable from "react-table";
-import { Link } from 'react-router-dom';
 import "react-table/react-table.css";
+import {
+    Button, Form, FormGroup, Label, Input, Col, Row
+} from 'reactstrap';
+import Error from './error';
+
+import {
+    MdAddCircle, MdEdit, MdSave, MdRemove
+} from "react-icons/md";
+
+
+const MUTATION_DELETE_PLAYER = gql`
+  mutation MUTATION_DELETE_PLAYER(
+      $id: ID!
+  ) {
+    deletePlayer(
+        id: $id
+    )
+    {
+        id
+        name
+    }
+  }
+`;
 
 const QUERY_GET_PLAYERS_FOR_LIST = gql`
   query QUERY_GET_PLAYERS_FOR_LIST ($id: ID! ) {
@@ -131,19 +153,21 @@ class List extends Component {
             // eslint-disable-next-line react/display-name
             Cell: row => (
                 <Fragment>
-                    <button
+                    <Button
+                        color="success"
                         onClick={() => this.handleOnClicPlayer('edit', row)}
                         type="button"
                     >
-                        {'Edit'}
-                    </button>
+                        <MdEdit />
+                    </Button>
 
-                    <button
+                    <Button
+                        color="danger"
                         onClick={() => this.handleOnClicPlayer('remove', row)}
                         type="button"
                     >
-                        {'Remove'}
-                    </button>
+                        <MdRemove />
+                    </Button>
                 </Fragment>
             ),
             Header: 'Operations',
@@ -151,8 +175,10 @@ class List extends Component {
         }
     ];
 
-    handleOnClicPlayer = (type, data) => {
-        const { id, name, surname, club, score1 = 0, score2 = 0, score3 = 0 } = data.row;
+    handleOnClicPlayer = async (type, data) => {
+        const {
+            id, name, surname, club, score1 = 0, score2 = 0, score3 = 0
+        } = data.row;
         if (type === 'edit') {
 
             const playerLayer = {
@@ -170,6 +196,14 @@ class List extends Component {
                 showPlayerLayer: true
             });
         }
+
+        if (type === 'remove') {
+            const { client } = this.props;
+            await client.mutate({
+                mutation: MUTATION_DELETE_PLAYER,
+                variables: { id }
+            });
+        }
     }
 
     handleOnAddPlayer = () => {
@@ -178,7 +212,7 @@ class List extends Component {
 
     handleOnUpdateFields = e => {
         let { playerLayer } = this.state;
-        let { value } = e.target;
+        const { value } = e.target;
         const { name } = e.target;
 
         playerLayer = {
@@ -218,7 +252,9 @@ class List extends Component {
     render() {
         const { match: { params: { listId, arbiters } } } = this.props;
         const { showPlayerLayer, playerLayer } = this.state;
-        const { name = '', surname = '', score1 = 0, score2 = 0, score3 = 0, club = '', id } = playerLayer;
+        const {
+            name = '', surname = '', score1 = 0, score2 = 0, score3 = 0, club = '', id
+        } = playerLayer;
         return (
             <div>
                 <Query
@@ -231,117 +267,192 @@ class List extends Component {
                             return <p>{'Loading...'}</p>;
                         }
                         if (error) {
-                            return (<p>{`Error: ${error.message}`}</p>);
+                            return <Error error={error} />;
                         }
                         return (
                             <div>
-                                <button
+                                <Button
+                                    color="primary"
                                     onClick={this.handleOnAddPlayer}
                                     type="button"
                                 >
-                                    {'Add Player'}
-                                </button>
+                                    <MdAddCircle />
+                                </Button>
 
                                 {showPlayerLayer && (
                                     <Mutation
                                         mutation={id ? MUTATION_UPDATE_PLAYER : MUTATION_CREATE_PLAYER}
-                                        refetchQueries={[{
-                                            query: QUERY_GET_PLAYERS_FOR_LIST,
-                                            variables: { id: listId }
-                                        }]}
+                                        refetchQueries={[
+                                            {
+                                                query: QUERY_GET_PLAYERS_FOR_LIST,
+                                                variables: { id: listId }
+                                            }
+                                        ]}
                                     >
                                         {(mutation, { loading, error }) => (
-                                            <div>
-                                                <label htmlFor="name">{'Name'}</label>
-                                                <input
-                                                    name="name"
-                                                    onChange={this.handleOnUpdateFields}
-                                                    value={name}
-                                                />
 
-                                                <label htmlFor="surname">{'Surname'}</label>
-                                                <input
-                                                    name="surname"
-                                                    onChange={this.handleOnUpdateFields}
-                                                    value={surname}
-                                                />
-
-                                                <label htmlFor="club">{'Club'}</label>
-                                                <input
-                                                    name="club"
-                                                    onChange={this.handleOnUpdateFields}
-                                                    value={club}
-                                                />
-
-                                                <label htmlFor="score1">{'Score1'}</label>
-                                                <input
-                                                    name="score1"
-                                                    onChange={this.handleOnUpdateFields}
-                                                    step="0.01"
-                                                    type="number"
-                                                    value={score1}
-                                                />
-                                                {arbiters >= 2 &&
-                                                    <Fragment>
-
-                                                        <label htmlFor="score2">{'Score2'}</label>
-                                                        <input
-                                                            name="score2"
-                                                            onChange={this.handleOnUpdateFields}
-                                                            step="0.01"
-                                                            type="number"
-                                                            value={score2}
-                                                        />
-                                                    </Fragment>
-                                                }
-                                                {arbiters >= 3 &&
-                                                    <Fragment>
-                                                        <label htmlFor="score3">{'Score3'}</label>
-                                                        <input
-                                                            name="score3"
-                                                            onChange={this.handleOnUpdateFields}
-                                                            step="0.01"
-                                                            type="number"
-                                                            value={score3}
-                                                        />
-                                                    </Fragment>
-                                                }
-
-                                                <button
+                                            <Form className="form">
+                                                <Row>
+                                                    <Col md={4}>
+                                                        <FormGroup row>
+                                                            <Label
+                                                                htmlFor="name"
+                                                                size="lg"
+                                                                sm={2}
+                                                            >
+                                                                {'Name'}
+                                                            </Label>
+                                                            <Col sm={10}>
+                                                                <Input
+                                                                    name="name"
+                                                                    onChange={this.handleOnUpdateFields}
+                                                                    value={name}
+                                                                />
+                                                            </Col>
+                                                        </FormGroup>
+                                                    </Col>
+                                                    <Col md={4}>
+                                                        <FormGroup row>
+                                                            <Label
+                                                                htmlFor="surname"
+                                                                size="lg"
+                                                                sm={2}
+                                                            >
+                                                                {'Surname'}
+                                                            </Label>
+                                                            <Col sm={10}>
+                                                                <Input
+                                                                    name="surname"
+                                                                    onChange={this.handleOnUpdateFields}
+                                                                    value={surname}
+                                                                />
+                                                            </Col>
+                                                        </FormGroup>
+                                                    </Col>
+                                                    <Col md={4}>
+                                                        <FormGroup row>
+                                                            <Label
+                                                                htmlFor="club"
+                                                                size="lg"
+                                                                sm={2}
+                                                            >
+                                                                {'Club'}
+                                                            </Label>
+                                                            <Col sm={10}>
+                                                                <Input
+                                                                    name="club"
+                                                                    onChange={this.handleOnUpdateFields}
+                                                                    value={club}
+                                                                />
+                                                            </Col>
+                                                        </FormGroup>
+                                                    </Col>
+                                                </Row>
+                                                <Row>
+                                                    <Col md={4}>
+                                                        <FormGroup row>
+                                                            <Label
+                                                                htmlFor="score1"
+                                                                size="lg"
+                                                                sm={2}
+                                                            >
+                                                                {'Score1'}
+                                                            </Label>
+                                                            <Col sm={10}>
+                                                                <Input
+                                                                    name="score1"
+                                                                    onChange={this.handleOnUpdateFields}
+                                                                    step="0.01"
+                                                                    type="number"
+                                                                    value={score1}
+                                                                />
+                                                            </Col>
+                                                        </FormGroup>
+                                                    </Col>
+                                                    {arbiters >= 2 &&
+                                                        <Col md={4}>
+                                                            <FormGroup row>
+                                                                <Label
+                                                                    htmlFor="score2"
+                                                                    size="lg"
+                                                                    sm={2}
+                                                                >
+                                                                    {'Score2'}
+                                                                </Label>
+                                                                <Col sm={10}>
+                                                                    <Input
+                                                                        name="score2"
+                                                                        onChange={this.handleOnUpdateFields}
+                                                                        step="0.01"
+                                                                        type="number"
+                                                                        value={score2}
+                                                                    />
+                                                                </Col>
+                                                            </FormGroup>
+                                                        </Col>
+                                                    }
+                                                    {arbiters >= 3 &&
+                                                        <Col md={4}>
+                                                            <FormGroup row>
+                                                                <Label
+                                                                    htmlFor="score3"
+                                                                    size="lg"
+                                                                    sm={2}
+                                                                >
+                                                                    {'Score3'}
+                                                                </Label>
+                                                                <Col sm={10}>
+                                                                    <Input
+                                                                        name="score3"
+                                                                        onChange={this.handleOnUpdateFields}
+                                                                        step="0.01"
+                                                                        type="number"
+                                                                        value={score3}
+                                                                    />
+                                                                </Col>
+                                                            </FormGroup>
+                                                        </Col>
+                                                    }
+                                                </Row>
+                                                <Button
+                                                    color="primary"
                                                     onClick={e => this.createOrUpdatePlayer(e, mutation)}
                                                     type="button"
                                                 >
-                                                    {'Save'}
-                                                </button>
-                                                {error && <div>{JSON.stringify(error)}</div>}
+                                                    <MdSave />
+                                                </Button>
+                                                {error && <Error error={error} />}
                                                 {loading && <p>{'Loading'}</p>}
-                                            </div>
+                                            </Form>
                                         )}
                                     </Mutation>
                                 )
                                 }
-                                <ReactTable
-                                    columns={this.columns}
-                                    data={data.players}
-                                    minRows={0}
-                                    showPagination={false}
-                                    defaultPageSize={100}
-                                />
+                                <Row>
+                                    <Col md={8}>
+                                        <ReactTable
+                                            columns={this.columns}
+                                            data={data.players}
+                                            defaultPageSize={100}
+                                            minRows={0}
+                                            showPagination={false}
+                                        />
+                                    </Col>
 
-
-                                {data.players && <Ranks data={data.players} />}
+                                    <Col md={4}>
+                                        {data.players && <Ranks data={data.players} />}
+                                    </Col>
+                                </Row>
                             </div>
                         );
                     }}
                 </Query>
-            </div>
+            </div >
         );
     }
 }
 
-export default withRouter(List);
+export default withRouter(withApollo(List));
 
-export {
-    QUERY_GET_PLAYERS_FOR_LIST
-}
+export { QUERY_GET_PLAYERS_FOR_LIST };
 

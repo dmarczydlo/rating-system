@@ -1,8 +1,33 @@
 import React, { Component, Fragment } from 'react';
-import { Query, Mutation } from 'react-apollo';
+import { Query, Mutation, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import ReactTable from "react-table";
 import { Link } from 'react-router-dom';
+import {
+    Button, Form, FormGroup, Label, Input
+} from 'reactstrap';
+import Error from './error';
+
+import {
+    MdAddCircle, MdEdit, MdSave, MdRemove, MdLabel
+} from "react-icons/md";
+
+
+const MUTATION_DELETE_LIST = gql`
+  mutation MUTATION_DELETE_LIST(
+      $id: ID!
+  ) {
+    deleteList(
+        id: $id
+    )
+    {
+        id
+        name
+        arbiters
+    }
+  }
+`;
+
 
 const QUERY_ALL_LISTS_QUERY = gql`
   query QUERY_ALL_LISTS_QUERY {
@@ -70,22 +95,28 @@ class ListTable extends Component {
             // eslint-disable-next-line react/display-name
             Cell: row => (
                 <Fragment>
-                    <button
+                    <Button
+                        color="success"
                         onClick={() => this.handleOnClickList('edit', row)}
                         type="button"
                     >
-                        {'Edit'}
-                    </button>
+                        <MdEdit />
+                    </Button>
 
-                    <Link to={`/players/${row.value}/${row.row.arbiters}`}>
-                        {'Enter'}
+                    <Link
+                        // eslint-disable-next-line react/forbid-component-props
+                        className="btn btn-primary"
+                        to={`/players/${row.value}/${row.row.arbiters}`}
+                    >
+                        <MdLabel />
                     </Link>
-                    <button
+                    <Button
+                        color="danger"
                         onClick={() => this.handleOnClickList('remove', row)}
                         type="button"
                     >
-                        {'Remove'}
-                    </button>
+                        <MdRemove />
+                    </Button>
                 </Fragment>
             ),
             Header: 'Operations',
@@ -93,7 +124,7 @@ class ListTable extends Component {
         }
     ];
 
-    handleOnClickList = (type, data) => {
+    handleOnClickList = async (type, data) => {
         const { id, name, arbiters } = data.row;
         if (type === 'edit') {
 
@@ -105,6 +136,14 @@ class ListTable extends Component {
             this.setState({
                 dataLayer,
                 showDataLayer: true
+            });
+        }
+
+        if (type === 'remove') {
+            const { client } = this.props;
+            await client.mutate({
+                mutation: MUTATION_DELETE_LIST,
+                variables: { id }
             });
         }
     }
@@ -156,16 +195,17 @@ class ListTable extends Component {
                             return <p>{'Loading...'}</p>;
                         }
                         if (error) {
-                            return (<p>{`Error: ${error.message}`}</p>);
+                            return <Error error={error} />;
                         }
                         return (
                             <div>
-                                <button
+                                <Button
+                                    color="info"
                                     onClick={this.handleOnClickNewList}
                                     type="button"
                                 >
-                                    {'Add list'}
-                                </button>
+                                    <MdAddCircle />
+                                </Button>
                                 {showDataLayer && (
                                     <Mutation
                                         mutation={id ? MUTATION_UPDATE_LIST : MUTATION_CREATE_LIST}
@@ -181,25 +221,49 @@ class ListTable extends Component {
                                     >
                                         {(mutation, { loading, error }) => (
                                             <div>
-                                                <label htmlFor="name">{'Name'}</label>
-                                                <input
-                                                    name="name"
-                                                    onChange={this.handleOnUpdateField}
-                                                    value={dataLayer.name}
-                                                />
-                                                <label htmlFor="arbiters">{'Arbiters'}</label>
-                                                <input
-                                                    name="arbiters"
-                                                    onChange={this.handleOnUpdateField}
-                                                    value={dataLayer.arbiters}
-                                                />
-                                                <button
-                                                    onClick={e => this.createOrUpdateList(e, mutation)}
-                                                    type="button"
+                                                <Form
+                                                    className="form"
+                                                    inline
                                                 >
-                                                    {'Save'}
-                                                </button>
-                                                {error && <div>{JSON.stringify(error)}</div>}
+
+                                                    <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                                                        <Label
+                                                            className="mr-sm-2"
+                                                            htmlFor="name"
+                                                        >
+                                                            {'Name'}
+                                                        </Label>
+                                                        <Input
+                                                            name="name"
+                                                            onChange={this.handleOnUpdateField}
+                                                            value={dataLayer.name}
+                                                        />
+                                                    </FormGroup>
+
+                                                    <FormGroup className="mb-2 mr-sm-2 mb-sm-0">
+                                                        <Label
+                                                            className="mr-sm-2"
+                                                            htmlFor="arbiters"
+                                                        >{'Arbiters'}
+                                                        </Label>
+                                                        <Input
+                                                            max={3}
+                                                            name="arbiters"
+                                                            onChange={this.handleOnUpdateField}
+                                                            type="number"
+                                                            value={dataLayer.arbiters}
+                                                        />
+                                                    </FormGroup>
+
+                                                    <Button
+                                                        color="primary"
+                                                        onClick={e => this.createOrUpdateList(e, mutation)}
+                                                        type="button"
+                                                    >
+                                                        <MdSave />
+                                                    </Button>
+                                                </Form>
+                                                {error && <Error error={error} />}
                                                 {loading && <p>{'Loading'}</p>}
                                             </div>
                                         )}
@@ -209,9 +273,9 @@ class ListTable extends Component {
                                 <ReactTable
                                     columns={this.columns}
                                     data={data.lists}
+                                    defaultPageSize={100}
                                     minRows={0}
                                     showPagination={false}
-                                    defaultPageSize={100}
                                 />
                             </div>
                         );
@@ -223,4 +287,4 @@ class ListTable extends Component {
     }
 }
 
-export default ListTable;
+export default withApollo(ListTable);
